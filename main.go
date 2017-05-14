@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"regexp"
 	"strings"
@@ -28,7 +27,7 @@ var configPath = "config.json"
 var env = Debug
 var bot *tgbotapi.BotAPI
 
-const subredditRegex = `(?:\A|\s)(?:\/)?(?P<sublink>[ru])\/(?P<subspec>[a-zA-Z0-9_\-]*)(?:\s|\z)`
+const oriRegex = `[Oo]ri`
 
 func (e *Environment) UnmarshalJSON(data []byte) error {
 	var str string
@@ -79,7 +78,7 @@ func initBotAPI(token string, env Environment) error {
 
 func main() {
 	var conf Config
-	var rx = regexp.MustCompile(subredditRegex)
+	var rx = regexp.MustCompile(oriRegex)
 
 	err := conf.readConfig(configPath)
 	if err != nil {
@@ -110,6 +109,7 @@ func main() {
 
 		// Found subreddits
 		if len(matches) > 0 {
+			/*
 			s := ""
 			for _, m := range matches {
 				// get sublink and sub/user from regex match
@@ -123,9 +123,11 @@ func main() {
 				link := result["sublink"]
 				sub := result["subspec"]
 				s += fmt.Sprintf("[/%s/%s](https://reddit.com/%s/%s)\n", link, sub, link, sub)
-			}
+			}*/
 
-			reply := tgbotapi.NewMessage(msg.Chat.ID, s)
+			msg.Text = rx.ReplaceAllString(msg.Text, "ORI")
+
+			reply := tgbotapi.NewMessage(msg.Chat.ID, msg.Text)
 			reply.ReplyToMessageID = msg.MessageID
 			reply.ParseMode = "markdown"
 
